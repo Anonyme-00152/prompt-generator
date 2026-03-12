@@ -278,6 +278,10 @@ export default function Home() {
               className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
               Générateur
             </button>
+            <button onClick={() => navigate('/improve')}
+              className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
+              Améliorer
+            </button>
           </div>
           <button
             onClick={() => navigate('/generator')}
@@ -735,6 +739,86 @@ bancaire
         </div>
       </section>
 
+      {/* Improve Prompt Section */}
+      <section className="py-24 relative overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, oklch(0.18 0.05 220 / 0.15) 0%, transparent 70%)' }} />
+        </div>
+        <div className="container relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-block px-3 py-1 rounded-full border border-sky-400/30 bg-sky-400/10 text-xs text-sky-400 uppercase tracking-wider mb-4">
+                Analyse Intelligente
+              </div>
+              <h2 className="font-syne font-black text-4xl md:text-5xl text-white mb-6">
+                Ameliore tes<br />
+                <span className="text-sky-400">prompts existants</span>
+              </h2>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                Tu as deja un prompt mais tu ne sais pas s'il est optimal ? Colle-le et recois des suggestions d'amelioration basees sur les 5 regles d'or du prompt engineering.
+              </p>
+              <button
+                onClick={() => navigate('/improve')}
+                className="nc-bevel inline-flex items-center gap-3 px-8 py-4 text-base font-bold text-background transition-all duration-200 hover:scale-105 active:scale-95 nc-glow-sky"
+                style={{ background: 'oklch(0.72 0.14 220)' }}
+              >
+                <span>🔍</span>
+                Analyser un Prompt
+              </button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="absolute -inset-4 rounded-2xl opacity-20"
+                style={{ background: 'radial-gradient(circle, oklch(0.72 0.14 220 / 0.3) 0%, transparent 70%)' }} />
+              <div className="relative rounded-xl border border-sky-400/20 bg-sky-400/5 p-6 backdrop-blur-sm">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-sky-400 font-bold text-lg mt-1">⚠️</span>
+                    <div>
+                      <p className="font-semibold text-white mb-1">Aucun role defini</p>
+                      <p className="text-xs text-slate-400">Ajoute un role precis au debut du prompt</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-emerald-400 font-bold text-lg mt-1">✓</span>
+                    <div>
+                      <p className="font-semibold text-white mb-1">Tache bien definie</p>
+                      <p className="text-xs text-slate-400">Objectif clair avec exigences</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-amber-400 font-bold text-lg mt-1">⭐</span>
+                    <div>
+                      <p className="font-semibold text-white mb-1">Balises XML utilisees</p>
+                      <p className="text-xs text-slate-400">Structure optimale detectee</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 pt-6 border-t border-sky-400/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Score d'optimisation</span>
+                    <span className="text-lg font-bold text-sky-400">72/100</span>
+                  </div>
+                  <div className="w-full h-2 bg-sky-400/10 rounded-full mt-2 overflow-hidden">
+                    <div className="h-full w-3/4 bg-gradient-to-r from-sky-500 to-sky-400" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -784,7 +868,10 @@ bancaire
               Techniques
             </button>
             <button onClick={() => navigate('/generator')} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
-              Générateur
+              Generateur
+            </button>
+            <button onClick={() => navigate('/improve')} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+              Ameliorer
             </button>
           </div>
         </div>

@@ -7,14 +7,16 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import GeneratorPage from "./pages/GeneratorPage";
 import TechniquesPage from "./pages/TechniquesPage";
+import ImprovePromptPage from "./pages/ImprovePromptPage";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/generator"} component={GeneratorPage} />
-      <Route path={"/techniques"} component={TechniquesPage} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path={"\x2F"} component={Home} />
+      <Route path={"\x2Fgenerator"} component={GeneratorPage} />
+      <Route path={"\x2Ftechniques"} component={TechniquesPage} />
+      <Route path={"\x2Fimprove"} component={ImprovePromptPage} />
+      <Route path={"\x2F404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
