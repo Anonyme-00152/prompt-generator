@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from "express";
 
 const router = Router();
 
@@ -10,43 +10,47 @@ interface TestPromptRequest {
 }
 
 // Test prompt endpoint
-router.post('/test-prompt', async (req: Request, res: Response) => {
+router.post("/test-prompt", async (req, res) => {
   try {
     const { apiKey, provider, systemPrompt, userMessage } = req.body as TestPromptRequest;
 
     if (!apiKey || !provider || !systemPrompt || !userMessage) {
-      return res.status(400).json({ error: 'Paramètres manquants' });
+      return res.status(400).json({ error: "Paramètres manquants" });
     }
 
     let response: string;
 
-    if (provider === 'openai') {
+    if (provider === "openai") {
       response = await testWithOpenAI(apiKey, systemPrompt, userMessage);
-    } else if (provider === 'anthropic') {
+    } else if (provider === "anthropic") {
       response = await testWithAnthropic(apiKey, systemPrompt, userMessage);
     } else {
-      return res.status(400).json({ error: 'Provider non supporté' });
+      return res.status(400).json({ error: "Provider non supporté" });
     }
 
     res.json({ response });
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMsg = error instanceof Error ? error.message : "Erreur inconnue";
     res.status(500).json({ error: errorMsg });
   }
 });
 
-async function testWithOpenAI(apiKey: string, systemPrompt: string, userMessage: string): Promise<string> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
+async function testWithOpenAI(
+  apiKey: string,
+  systemPrompt: string,
+  userMessage: string
+): Promise<string> {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4-turbo-preview',
+      model: "gpt-4-turbo-preview",
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage },
       ],
       max_tokens: 1000,
       temperature: 0.7,
@@ -55,34 +59,36 @@ async function testWithOpenAI(apiKey: string, systemPrompt: string, userMessage:
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error?.message || 'Erreur OpenAI');
+    throw new Error(error.error?.message || "Erreur OpenAI");
   }
 
   const data = await response.json();
   return data.choices[0].message.content;
 }
 
-async function testWithAnthropic(apiKey: string, systemPrompt: string, userMessage: string): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
+async function testWithAnthropic(
+  apiKey: string,
+  systemPrompt: string,
+  userMessage: string
+): Promise<string> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: 'claude-3-opus-20240229',
+      model: "claude-3-opus-20240229",
       max_tokens: 1000,
       system: systemPrompt,
-      messages: [
-        { role: 'user', content: userMessage },
-      ],
+      messages: [{ role: "user", content: userMessage }],
     }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error?.message || 'Erreur Anthropic');
+    throw new Error(error.error?.message || "Erreur Anthropic");
   }
 
   const data = await response.json();
