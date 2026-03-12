@@ -128,6 +128,7 @@ export default function ImprovePromptPage() {
                   variant="outline"
                   size="sm"
                   className="flex-1"
+                  aria-label="Copier le prompt actuel"
                 >
                   <Copy className="w-4 h-4 mr-2" /> Copier
                 </Button>
@@ -137,6 +138,7 @@ export default function ImprovePromptPage() {
                   variant="outline"
                   size="sm"
                   className="flex-1"
+                  aria-label="Réinitialiser le champ de saisie"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" /> Réinitialiser
                 </Button>

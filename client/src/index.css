@@ -56,6 +56,9 @@
   --color-surface-1: oklch(0.14 0.02 240);
   --color-surface-2: oklch(0.17 0.025 240);
   --color-surface-3: oklch(0.21 0.03 240);
+  --color-nav-bg: oklch(0.09 0.018 240 / 0.95);
+  --color-surface-card: oklch(0.13 0.022 240);
+  --color-surface-grid: oklch(0.10 0.019 240);
 }
 
 :root {

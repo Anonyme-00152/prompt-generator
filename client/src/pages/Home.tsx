@@ -259,26 +259,25 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-        style={{ background: 'oklch(0.09 0.018 240 / 0.9)', backdropFilter: 'blur(20px)' }}>
+      {/* Navigation */}      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-nav-bg"
+        style={{ backdropFilter: 'blur(20px)' }} aria-label="Navigation principale">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="PromptCraft" className="w-8 h-8 object-contain" />
+            <img src={LOGO_URL} alt="PromptCraft" className="w-8 h-8 object-contain" loading="lazy" />
             <span className="font-syne font-bold text-white text-lg tracking-tight">
               Prompt<span className="text-amber-400">Craft</span>
             </span>
           </div>
           <div className="hidden md:flex items-center gap-6">
-            <button onClick={() => navigate('/techniques')}
+            <button onClick={() => navigate('/techniques')} aria-label="Voir les techniques"
               className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
               Techniques
             </button>
-            <button onClick={() => navigate('/generator')}
+            <button onClick={() => navigate('/generator')} aria-label="Ouvrir le générateur"
               className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
               Générateur
             </button>
-            <button onClick={() => navigate('/improve')}
+            <button onClick={() => navigate('/improve')} aria-label="Améliorer un prompt"
               className="text-sm text-slate-400 hover:text-white transition-colors font-medium">
               Améliorer
             </button>
@@ -517,7 +516,7 @@ bancaire
       </section>
 
       {/* 5 Golden Rules Section */}
-      <section className="py-24 relative" style={{ background: 'oklch(0.10 0.019 240)' }}>
+      <section className="py-24 relative bg-surface-grid">
         <div className="absolute inset-0 nc-grid-bg opacity-20" />
         <div className="container relative z-10">
           <motion.div
@@ -609,10 +608,10 @@ bancaire
       </section>
 
       {/* Templates Preview */}
-      <section className="py-24 relative" style={{ background: 'oklch(0.10 0.019 240)' }}>
+      <section className="py-24 relative bg-surface-grid">
         <div className="absolute inset-0">
           <img src={NEURAL_BG} alt="" className="w-full h-full object-cover opacity-10" />
-          <div className="absolute inset-0" style={{ background: 'oklch(0.10 0.019 240 / 0.85)' }} />
+          <div className="absolute inset-0 bg-surface-grid/85" />
         </div>
         <div className="container relative z-10">
           <motion.div
@@ -681,6 +680,7 @@ bancaire
                 src={MOCKUP_URL}
                 alt="Exemple de prompt structuré"
                 className="rounded-xl border border-amber-500/20 w-full shadow-2xl"
+                loading="lazy"
               />
               {/* Floating badges */}
               <motion.div
@@ -864,13 +864,13 @@ bancaire
             Basé sur les guides officiels d'OpenAI, Google & Anthropic — Prompt Engineering 2026
           </p>
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/techniques')} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+            <button onClick={() => navigate('/techniques')} aria-label="Voir les techniques" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
               Techniques
             </button>
-            <button onClick={() => navigate('/generator')} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+            <button onClick={() => navigate('/generator')} aria-label="Ouvrir le générateur" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
               Generateur
             </button>
-            <button onClick={() => navigate('/improve')} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+            <button onClick={() => navigate('/improve')} aria-label="Améliorer un prompt" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
               Ameliorer
             </button>
           </div>

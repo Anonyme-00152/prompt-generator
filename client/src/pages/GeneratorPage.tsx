@@ -3,11 +3,20 @@
 // Interactive prompt builder with all 5 sections + techniques
 // ============================================================
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PROMPT_SECTIONS, PROMPT_TECHNIQUES, PROMPT_TEMPLATES } from "@/lib/promptData";
+import { generatePromptPDF } from "@/lib/pdfGenerator";
+import { VariablesPanel } from "@/components/VariablesPanel";
+import { FavoritesPanel } from "@/components/FavoritesPanel";
+import { PlaygroundPanel } from "@/components/PlaygroundPanel";
+import { ABTestingPanel } from "@/components/ABTestingPanel";
+import { TerminalAnimation } from "@/components/TerminalAnimation";
+import { usePromptStore, type Favorite } from "@/store/promptStore";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663431528324/ZEzuuoF7e3Cktusam36Raq/prompt-craft-logo-JrRd8EkJxF5PcfPxXC5LKX.webp";
 
@@ -188,6 +197,8 @@ function SectionEditor({
       <button
         className="w-full flex items-center gap-4 p-5 text-left"
         onClick={onActivate}
+        aria-expanded={isActive}
+        aria-label={`Éditer la section ${section.label}`}
       >
         <div className="relative shrink-0">
           <div className={`w-10 h-10 rounded-lg border ${c.border} flex items-center justify-center`}
@@ -297,6 +308,7 @@ function SectionEditor({
 
 function PromptPreview({ prompt, score }: { prompt: string; score: number }) {
   const [copied, setCopied] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   const handleCopy = async () => {
     if (!prompt) return;
@@ -306,6 +318,41 @@ function PromptPreview({ prompt, score }: { prompt: string; score: number }) {
       description: 'Colle-le directement dans ChatGPT, Claude ou Gemini.',
     });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadFile = (content: string, fileName: string, contentType: string) => {
+    const a = document.createElement("a");
+    const file = new Blob([content], { type: contentType });
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const handleExportTxt = () => {
+    downloadFile(prompt, "prompt.txt", "text/plain");
+    toast.success('Prompt exporté en .txt');
+  };
+
+  const handleExportMd = () => {
+    const mdContent = `# Prompt Généré via PromptCraft\n\n${prompt}`;
+    downloadFile(mdContent, "prompt.md", "text/markdown");
+    toast.success('Prompt exporté en .md');
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      await generatePromptPDF(prompt, score, 'prompt.pdf');
+      toast.success('Prompt exporté en PDF');
+    } catch (error) {
+      toast.error('Erreur lors de l\'export PDF');
+    }
+  };
+
+  const handleCopyWithAnimation = async () => {
+    setShowAnimation(true);
+    await handleCopy();
+    setTimeout(() => setShowAnimation(false), 2000);
   };
 
   // Syntax highlight the prompt
@@ -356,26 +403,53 @@ function PromptPreview({ prompt, score }: { prompt: string; score: number }) {
       {/* Footer actions */}
       {prompt && (
         <div className="border-t border-white/5 p-4 flex gap-3">
-          <button
-            onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: copied ? 'oklch(0.45 0.15 145)' : 'oklch(0.75 0.18 65)', color: 'oklch(0.09 0.018 240)' }}
-          >
-            {copied ? '✓ Copié !' : '⎘ Copier le prompt'}
-          </button>
+          <div className="flex flex-col w-full gap-2">
+            <button
+              onClick={handleCopy}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: copied ? 'oklch(0.45 0.15 145)' : 'oklch(0.75 0.18 65)', color: 'oklch(0.09 0.018 240)' }}
+              aria-label="Copier le prompt"
+            >
+              {copied ? '✓ Copié !' : '⎘ Copier le prompt'}
+            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExportTxt}
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-semibold text-xs transition-all duration-200 border border-white/10 hover:bg-white/5"
+                aria-label="Exporter en TXT"
+              >
+                📄 .TXT
+              </button>
+              <button
+                onClick={handleExportMd}
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-semibold text-xs transition-all duration-200 border border-white/10 hover:bg-white/5"
+                aria-label="Exporter en Markdown"
+              >
+                📝 .MD
+              </button>
+              <button
+                onClick={handleExportPDF}
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-semibold text-xs transition-all duration-200 border border-white/10 hover:bg-white/5"
+                aria-label="Exporter en PDF"
+              >
+                📕 .PDF
+              </button>
+            </div>
+          </div>
         </div>
       )}
+      <TerminalAnimation isActive={showAnimation} prompt={prompt} />
     </div>
   );
 }
 
 export default function GeneratorPage() {
   const [, navigate] = useLocation();
-  const [values, setValues] = useState<SectionValues>({});
+  const [values, setValues] = useLocalStorage<SectionValues>('pc-values', {});
   const [activeSection, setActiveSection] = useState<string>('role');
-  const [activeTechniques, setActiveTechniques] = useState<ActiveTechniques>({});
-  const [verbosity, setVerbosity] = useState<VerbosityLevel>('medium');
-  const [confidenceEnabled, setConfidenceEnabled] = useState(false);
+  const [activeTechniques, setActiveTechniques] = useLocalStorage<ActiveTechniques>('pc-techniques', {});
+  const [verbosity, setVerbosity] = useLocalStorage<VerbosityLevel>('pc-verbosity', 'medium');
+  const [confidenceEnabled, setConfidenceEnabled] = useLocalStorage<boolean>('pc-confidence', false);
   const [activeTab, setActiveTab] = useState<'builder' | 'templates' | 'techniques'>('builder');
 
   const updateValue = useCallback((id: string, val: string) => {
@@ -418,17 +492,21 @@ export default function GeneratorPage() {
     setActiveTechniques({});
     setVerbosity('medium');
     setConfidenceEnabled(false);
+    window.localStorage.removeItem('pc-values');
+    window.localStorage.removeItem('pc-techniques');
+    window.localStorage.removeItem('pc-verbosity');
+    window.localStorage.removeItem('pc-confidence');
     toast.info('Générateur réinitialisé');
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Navigation */}
-      <nav className="shrink-0 border-b border-white/5 z-50"
-        style={{ background: 'oklch(0.09 0.018 240 / 0.95)', backdropFilter: 'blur(20px)' }}>
+      <nav className="shrink-0 border-b border-white/5 z-50 bg-nav-bg"
+        style={{ backdropFilter: 'blur(20px)' }} aria-label="Navigation principale">
         <div className="flex items-center justify-between h-14 px-4 md:px-6">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="Retour à l'accueil">
               <img src={LOGO_URL} alt="PromptCraft" className="w-7 h-7 object-contain" />
               <span className="font-syne font-bold text-white hidden md:block">
                 Prompt<span className="text-amber-400">Craft</span>
@@ -439,8 +517,7 @@ export default function GeneratorPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10"
-            style={{ background: 'oklch(0.13 0.022 240)' }}>
+          <div className="flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-surface-card">
             {[
               { id: 'builder', label: '⚡ Builder' },
               { id: 'templates', label: '📋 Templates' },
@@ -451,10 +528,10 @@ export default function GeneratorPage() {
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 ${
                   activeTab === tab.id
-                    ? 'text-black'
+                    ? 'text-black bg-amber'
                     : 'text-slate-400 hover:text-white'
                 }`}
-                style={activeTab === tab.id ? { background: 'oklch(0.75 0.18 65)' } : {}}
+                aria-pressed={activeTab === tab.id}
               >
                 {tab.label}
               </button>
@@ -464,6 +541,7 @@ export default function GeneratorPage() {
           <button
             onClick={resetAll}
             className="text-xs text-slate-500 hover:text-slate-300 transition-colors border border-white/10 px-3 py-1.5 rounded-lg"
+            aria-label="Réinitialiser tous les champs du générateur"
           >
             Réinitialiser
           </button>
@@ -525,6 +603,8 @@ export default function GeneratorPage() {
                                 ? 'border-amber-500/60 text-amber-400 bg-amber-500/10'
                                 : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-400'
                             }`}
+                            aria-pressed={verbosity === v}
+                            aria-label={`Verbosité ${v}`}
                           >
                             {v === 'low' ? 'Low' : v === 'medium' ? 'Medium' : 'High'}
                           </button>
@@ -547,6 +627,8 @@ export default function GeneratorPage() {
                         className={`relative w-11 h-6 rounded-full transition-all duration-200 ${
                           confidenceEnabled ? 'bg-sky-400' : 'bg-white/10'
                         }`}
+                        aria-pressed={confidenceEnabled}
+                        aria-label="Activer l'indice de confiance"
                       >
                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-200 ${
                           confidenceEnabled ? 'left-6' : 'left-1'
@@ -569,6 +651,8 @@ export default function GeneratorPage() {
                         className={`relative w-11 h-6 rounded-full transition-all duration-200 ${
                           activeTechniques.cov ? 'bg-amber-400' : 'bg-white/10'
                         }`}
+                        aria-pressed={activeTechniques.cov}
+                        aria-label="Activer la Chain of Verification (COV)"
                       >
                         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-200 ${
                           activeTechniques.cov ? 'left-6' : 'left-1'
@@ -591,6 +675,8 @@ export default function GeneratorPage() {
                           className={`relative w-11 h-6 rounded-full transition-all duration-200 ${
                             activeTechniques.fewshot ? 'bg-emerald-400' : 'bg-white/10'
                           }`}
+                          aria-pressed={activeTechniques.fewshot}
+                          aria-label="Activer le Few-Shot Prompting"
                         >
                           <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-200 ${
                             activeTechniques.fewshot ? 'left-6' : 'left-1'
