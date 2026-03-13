@@ -36,32 +36,8 @@ export function PlaygroundPanel({ prompt }: PlaygroundPanelProps) {
     setPlaygroundLoading(true);
     setPlaygroundError(null);
 
-    try {
-      const response = await fetch('/api/test-prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: tempApiKey,
-          provider: playground.provider,
-          systemPrompt: prompt,
-          userMessage,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'appel API');
-      }
-
-      const data = await response.json();
-      setPlaygroundResponse(data.response);
-      toast.success('Réponse reçue !');
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Erreur inconnue';
-      setPlaygroundError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setPlaygroundLoading(false);
-    }
+    toast.info('Le Playground nécessite un backend pour fonctionner. Cette version est purement frontend.');
+    setPlaygroundLoading(false);
   };
 
   return (
